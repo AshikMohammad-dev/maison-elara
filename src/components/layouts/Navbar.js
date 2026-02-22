@@ -8,8 +8,8 @@ function Navbar() {
       </div>
 
       <div className="nav-right">
-        <a href="#products">Collections</a>
-        <a href="#contact">Visit</a>
+        {/* <a href="#products">Collections</a> */}
+        {/* <a href="#contact">Visit</a> */}
 
       </div>
     </nav>
