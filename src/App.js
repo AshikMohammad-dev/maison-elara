@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Routes, Route } from "react-router-dom";
+
 import { BRAND } from "./config/brand";
 
 import Navbar from "./components/layouts/Navbar";
@@ -11,6 +13,8 @@ import StudioSection from "./components/sections/StudioSection";
 import Testimonials from "./components/sections/Testimonials";
 import VisitSection from "./components/sections/VisitSection";
 
+import AdminApp from "./admin/AdminApp";
+
 import "./App.css";
 
 function App() {
@@ -18,91 +22,112 @@ function App() {
   const [activeCategory, setActiveCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // ================= SEO =================
   useEffect(() => {
 
-    // 🔥 Tab Title → Only Brand Name
     document.title = BRAND.name;
 
-    // 🔥 Meta Description
-    let description = document.querySelector("meta[name='description']");
-    if (!description) {
-      description = document.createElement("meta");
-      description.setAttribute("name", "description");
-      document.head.appendChild(description);
-    }
-    description.setAttribute("content", BRAND.seo.description);
+    const setMeta = (selector, attr, value) => {
 
-    // 🔥 Open Graph Title
-    let ogTitle = document.querySelector("meta[property='og:title']");
-    if (!ogTitle) {
-      ogTitle = document.createElement("meta");
-      ogTitle.setAttribute("property", "og:title");
-      document.head.appendChild(ogTitle);
-    }
-    ogTitle.setAttribute("content", BRAND.seo.title);
+      let tag = document.querySelector(selector);
 
-    // 🔥 Open Graph Description
-    let ogDesc = document.querySelector("meta[property='og:description']");
-    if (!ogDesc) {
-      ogDesc = document.createElement("meta");
-      ogDesc.setAttribute("property", "og:description");
-      document.head.appendChild(ogDesc);
-    }
-    ogDesc.setAttribute("content", BRAND.seo.description);
+      if (!tag) {
+        tag = document.createElement("meta");
 
-    // 🔥 Open Graph Image
-    let ogImage = document.querySelector("meta[property='og:image']");
-    if (!ogImage) {
-      ogImage = document.createElement("meta");
-      ogImage.setAttribute("property", "og:image");
-      document.head.appendChild(ogImage);
-    }
-    ogImage.setAttribute(
-      "content",
+        tag.setAttribute(
+          selector.includes("property")
+            ? "property"
+            : "name",
+          attr
+        );
+
+        document.head.appendChild(tag);
+      }
+
+      tag.setAttribute("content", value);
+    };
+
+    setMeta(
+      "meta[name='description']",
+      "description",
+      BRAND.seo.description
+    );
+
+    setMeta(
+      "meta[property='og:title']",
+      "og:title",
+      BRAND.seo.title
+    );
+
+    setMeta(
+      "meta[property='og:description']",
+      "og:description",
+      BRAND.seo.description
+    );
+
+    setMeta(
+      "meta[property='og:url']",
+      "og:url",
+      window.location.origin
+    );
+
+    setMeta(
+      "meta[property='og:image']",
+      "og:image",
       `${window.location.origin}${BRAND.heroImage}`
     );
 
-    // 🔥 Open Graph URL
-    let ogURL = document.querySelector("meta[property='og:url']");
-    if (!ogURL) {
-      ogURL = document.createElement("meta");
-      ogURL.setAttribute("property", "og:url");
-      document.head.appendChild(ogURL);
-    }
-    ogURL.setAttribute("content", window.location.origin);
+    let favicon =
+      document.querySelector("link[rel='icon']")
+      || document.createElement("link");
 
-    // 🔥 Dynamic Favicon
-    let favicon = document.querySelector("link[rel='icon']");
-    if (!favicon) {
-      favicon = document.createElement("link");
-      favicon.setAttribute("rel", "icon");
-      document.head.appendChild(favicon);
-    }
-    favicon.setAttribute("href", BRAND.seo.favicon);
+    favicon.rel = "icon";
+    favicon.href = BRAND.seo.favicon;
+
+    document.head.appendChild(favicon);
 
   }, []);
 
+  // ================= CATEGORY =================
+
   const handleCategorySelect = (category) => {
+
     setSearchQuery("");
     setActiveCategory(category);
 
-    setTimeout(() => {
-      document.getElementById("products")
-        ?.scrollIntoView({ behavior: "smooth" });
-    }, 150);
+    scrollToProducts();
+
   };
 
+  // ================= SEARCH =================
+
   const handleSearch = (query) => {
+
     setActiveCategory(null);
     setSearchQuery(query);
 
-    setTimeout(() => {
-      document.getElementById("products")
-        ?.scrollIntoView({ behavior: "smooth" });
-    }, 150);
+    scrollToProducts();
+
   };
 
-  return (
+  const scrollToProducts = () => {
+
+    setTimeout(() => {
+
+      document
+        .getElementById("products")
+        ?.scrollIntoView({
+          behavior: "smooth"
+        });
+
+    }, 150);
+
+  };
+
+  // ================= WEBSITE UI =================
+
+  const Website = () => (
+
     <>
       <Navbar
         onCategorySelect={handleCategorySelect}
@@ -123,7 +148,25 @@ function App() {
       <Footer />
       <WhatsAppFloat />
     </>
+
   );
+
+  // ================= ROUTES =================
+
+  return (
+
+    <Routes>
+
+      {/* Website */}
+      <Route path="/" element={<Website />} />
+
+      {/* Admin */}
+      <Route path="/admin/*" element={<AdminApp />} />
+
+    </Routes>
+
+  );
+
 }
 
 export default App;

@@ -1,53 +1,106 @@
 import { useState, useEffect, useRef } from "react";
-import { PRODUCTS } from "../../data/products";
+
+import { db } from "../../firebase/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 function SearchOverlay({ close, onSearch }) {
 
   const [query, setQuery] = useState("");
+  const [products, setProducts] = useState([]);
+
   const inputRef = useRef(null);
 
+  // focus input
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  const filtered = PRODUCTS.filter((product) =>
-    product.name.toLowerCase().includes(query.toLowerCase())
+  // 🔥 Fetch products from Firebase
+  useEffect(() => {
+
+    const fetchProducts = async () => {
+
+      try {
+
+        const snapshot =
+          await getDocs(collection(db, "products"));
+
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        setProducts(data);
+
+      } catch (error) {
+        console.error("Search fetch error:", error);
+      }
+
+    };
+
+    fetchProducts();
+
+  }, []);
+
+  // filter
+  const filtered = products.filter(product =>
+    product.name
+      ?.toLowerCase()
+      .includes(query.toLowerCase())
   );
 
   const handleSubmit = () => {
+
     if (!query.trim()) return;
+
     onSearch(query);
     close();
   };
 
   const handleSuggestionClick = (name) => {
+
     onSearch(name);
     close();
   };
 
   return (
-    <div className="search-overlay" onClick={close}>
-      
+
+    <div
+      className="search-overlay"
+      onClick={close}
+    >
+
       <div
         className="search-box"
         onClick={(e) => e.stopPropagation()}
       >
 
         <div className="search-input-wrapper">
+
           <input
             ref={inputRef}
             type="text"
             placeholder="Search for bridal, saree, gowns..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            onChange={(e) =>
+              setQuery(e.target.value)
+            }
+            onKeyDown={(e) =>
+              e.key === "Enter" && handleSubmit()
+            }
           />
 
+          {/* ✅ ORIGINAL SVG ICON */}
           <button
             className="search-btn"
             onClick={handleSubmit}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
               <circle
                 cx="11"
                 cy="11"
@@ -66,31 +119,52 @@ function SearchOverlay({ close, onSearch }) {
               />
             </svg>
           </button>
+
         </div>
 
         {query && (
+
           <div className="search-suggestions">
+
             {filtered.length > 0 ? (
-              filtered.slice(0, 6).map((item) => (
+
+              filtered.slice(0, 6).map(item => (
+
                 <div
                   key={item.id}
                   className="suggestion-item"
-                  onClick={() => handleSuggestionClick(item.name)}
+                  onClick={() =>
+                    handleSuggestionClick(item.name)
+                  }
                 >
-                  <img src={item.image} alt={item.name} />
+
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                  />
+
                   <span>{item.name}</span>
+
                 </div>
+
               ))
+
             ) : (
+
               <div className="search-empty">
                 No products found
               </div>
+
             )}
+
           </div>
+
         )}
 
       </div>
+
     </div>
+
   );
 }
 

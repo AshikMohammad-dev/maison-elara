@@ -1,39 +1,101 @@
+import { useState, useEffect } from "react";
 import { BRAND } from "../../config/brand";
+import { CloseIcon, WhatsAppIcon, CheckIcon } from "../icons/Icons";
+import { db } from "../../firebase/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 function ProductModal({ product, onClose }) {
+  const [productDetails, setProductDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch full product details from Firebase
+  useEffect(() => {
+    if (!product) return;
+    
+    const fetchProductDetails = async () => {
+      try {
+        const docRef = doc(db, "products", product.id);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          setProductDetails({
+            ...product,
+            ...docSnap.data()
+          });
+        } else {
+          setProductDetails(product);
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        setProductDetails(product);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [product]);
+
   if (!product) return null;
+  if (loading) return null;
 
-  // Better product link (works even without routing)
-  const productURL = `${window.location.origin}/?product=${product.id}`;
+  const displayProduct = productDetails || product;
+  const productURL = `${window.location.origin}/?product=${displayProduct.id}`;
 
-  const message = `
-Hello,
-
-I'm interested in:
-
-Product: ${product.name}
-Category: ${product.category}
-Price: ${product.price}
-
-View product: ${productURL}
-
-Please share more details.
-`;
+  const message = `Hello,\n\nI'm interested in:\n\nProduct: ${displayProduct.name}\nCategory: ${displayProduct.category}\nPrice: ₹${displayProduct.price}\n\nView product: ${productURL}\n\nPlease share more details.`;
 
   const whatsappURL = `https://wa.me/${BRAND.phone}?text=${encodeURIComponent(message)}`;
+
+  // Format price in Indian style
+  const formattedPrice = Number(displayProduct.price).toLocaleString("en-IN");
+
+  // Get features from Firebase, or use defaults
+  const features = displayProduct.features || [
+    "Premium Quality Fabric",
+    "Exquisite Design",
+    "Perfect For Celebrations",
+    "Customization Available"
+  ];
+
+  // Get description from Firebase, or use default
+  const description = displayProduct.description || 
+    "Crafted with meticulous attention to detail, this piece represents the epitome of elegance and sophistication. Perfect for your most cherished moments.";
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>×</button>
+        <button className="modal-close" onClick={onClose}>
+          <CloseIcon size={24} color="#3d3d3d" />
+        </button>
 
         <div className="modal-grid">
-          <img src={product.image} alt={product.name} />
+          <div className="modal-image-container">
+            <img src={displayProduct.image} alt={displayProduct.name} />
+          </div>
 
           <div className="modal-info">
-            <h2>{product.name}</h2>
-            <p>{product.category}</p>
-            <p>{product.price}</p>
+            <div className="modal-category">{displayProduct.category}</div>
+            <h2>{displayProduct.name}</h2>
+            
+            <div className="modal-price">₹{formattedPrice}</div>
+
+            {description && (
+              <p className="modal-description">{description}</p>
+            )}
+
+            {features && features.length > 0 && (
+              <div className="modal-features">
+                <h4>Features</h4>
+                <ul>
+                  {features.map((feature, index) => (
+                    <li key={index}>
+                      <CheckIcon size={16} />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <a
               href={whatsappURL}
@@ -41,7 +103,8 @@ Please share more details.
               rel="noopener noreferrer"
               className="whatsapp-btn"
             >
-              Enquire on WhatsApp
+              <WhatsAppIcon size={20} />
+              <span>Enquire on WhatsApp</span>
             </a>
           </div>
         </div>

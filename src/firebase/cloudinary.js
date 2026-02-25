@@ -13,25 +13,10 @@ function StudioSection() {
             Private fittings, personalized styling, and curated collections
             designed for the modern bride.
           </p>
-
-          <div className="studio-features">
-            <div className="studio-feature">
-              <div className="studio-feature-icon">✨</div>
-              <div className="studio-feature-title">Personalized</div>
-            </div>
-            <div className="studio-feature">
-              <div className="studio-feature-icon">👑</div>
-              <div className="studio-feature-title">Curated</div>
-            </div>
-            <div className="studio-feature">
-              <div className="studio-feature-icon">💎</div>
-              <div className="studio-feature-title">Luxury</div>
-            </div>
-          </div>
         </div>
 
         <div className="studio-image">
-          <img src="/images/p2.jpg" alt="Studio Experience" />
+          <img src="/images/p2.jpg" alt="Studio" />
         </div>
       </div>
     </section>
