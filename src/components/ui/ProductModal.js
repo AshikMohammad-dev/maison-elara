@@ -39,7 +39,7 @@ function ProductModal({ product, onClose }) {
     };
 
     fetchProductDetails();
-  }, [product?.id]);
+  }, [product]);
 
   if (!product) return null;
   if (loading || !productDetails) return null;
