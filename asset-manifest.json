@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/maison-elara/static/css/main.afaf199d.css",
+    "main.js": "/maison-elara/static/js/main.d3a58d33.js",
+    "index.html": "/maison-elara/index.html",
+    "main.afaf199d.css.map": "/maison-elara/static/css/main.afaf199d.css.map",
+    "main.d3a58d33.js.map": "/maison-elara/static/js/main.d3a58d33.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.afaf199d.css",
+    "static/js/main.d3a58d33.js"
+  ]
+}
